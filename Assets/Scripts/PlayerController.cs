@@ -1,12 +1,14 @@
+using Mirror;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController), typeof(PlayerInput))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     [SerializeField] private float walkSpeed = 2.0f;
     [SerializeField] private float runSpeed = 6.0f;
-    [SerializeField] private float playerSpeed = 2.0f;
+    //[SerializeField] private float playerSpeed = 2.0f;
     [SerializeField] private float jumpHeight = 1.0f;
     [SerializeField] private float gravityValue = -9.81f;
     [SerializeField] private float rotationSpeed = 5f;
@@ -25,6 +27,18 @@ public class PlayerController : MonoBehaviour
     private int jumpAnimation;
     private float currentSpeed;
 
+    public override void OnStartLocalPlayer()
+    {
+        GameObject.FindGameObjectWithTag("PlayerFollowCamera").GetComponent<CinemachineCamera>().Follow = transform.GetChild(0).transform;
+    }
+
+    public override void OnStartAuthority()
+    {
+        base.OnStartAuthority();
+
+        playerInput = GetComponent<PlayerInput>();
+        playerInput.enabled = true;
+    }
 
     private void Start()
     {
@@ -40,6 +54,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (!isLocalPlayer) return;
+
         // Check if player is grounded
         groundedPlayer = controller.isGrounded;
         if (groundedPlayer && playerVelocity.y < 0)
