@@ -44,7 +44,7 @@ How to Play
 
 Start the Game:
 
-Launch the game by running MultiplayerGame.exe.
+Launch the game by running Sample 3D.exe.
 
 Host a Game:
 
@@ -62,10 +62,9 @@ W, A, S, D: Move the character
 
 Spacebar: Jump
 
-
 Interact with the Sphere:
 
-Approach the sphere and press Ui button to change its colour.
+Approach the sphere and press the Ui button to change its colour.
 
 Networking Setup
 
