@@ -38,7 +38,7 @@ Extract the downloaded ZIP file to a location on your PC.
 
 Run the Game:
 
-Double-click on MultiplayerGame.exe to launch the game.
+Double-click on Sample 3D.exe to launch the game.
 
 How to Play
 
