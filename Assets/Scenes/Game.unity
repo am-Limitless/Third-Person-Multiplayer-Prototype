@@ -543,7 +543,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sceneId: 2834152789
   _assetId: 0
-  serverOnly: 0
+  serverOnly: 1
   visibility: 0
   hasSpawned: 0
 --- !u!1 &1926084689
@@ -716,6 +716,10 @@ PrefabInstance:
     - target: {fileID: 1689173322299501154, guid: 43d19231a39a97846a1b319a2984b9dd, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2542222891208749710, guid: 43d19231a39a97846a1b319a2984b9dd, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -34
       objectReference: {fileID: 0}
     - target: {fileID: 6273975638672899963, guid: 43d19231a39a97846a1b319a2984b9dd, type: 3}
       propertyPath: m_Name

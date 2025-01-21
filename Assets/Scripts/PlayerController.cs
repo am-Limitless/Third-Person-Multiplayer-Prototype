@@ -16,17 +16,19 @@ public class PlayerController : NetworkBehaviour
 
     private CharacterController controller;
     private PlayerInput playerInput;
-    private Vector3 playerVelocity;
-    private bool groundedPlayer;
-    private Transform cameraTransform;
     private Animator animator;
+
+    private Vector3 playerVelocity;
+    private Transform cameraTransform;
+
+    private bool groundedPlayer;
+    private float currentSpeed;
 
     private InputAction moveAction;
     private InputAction jumpAction;
 
     private int jumpAnimation;
-    private float currentSpeed;
-
+    
     public override void OnStartLocalPlayer()
     {
         base.OnStartLocalPlayer();
@@ -50,6 +52,7 @@ public class PlayerController : NetworkBehaviour
 
         moveAction = playerInput.actions["Move"];
         jumpAction = playerInput.actions["Jump"];
+
         jumpAnimation = Animator.StringToHash("Jumping");
         currentSpeed = walkSpeed;
     }
@@ -67,35 +70,33 @@ public class PlayerController : NetworkBehaviour
 
     private void HandleMovement()
     {
-        // Check if player is grounded
-        groundedPlayer = controller.isGrounded;
+        groundedPlayer = controller.isGrounded; // Check if player is grounded
 
         if (groundedPlayer && playerVelocity.y < 0)
         {
             playerVelocity.y = 0f;
         }
 
-        // Get movement input
         Vector2 input = moveAction.ReadValue<Vector2>();
-        float inputMagnitude = input.magnitude; // Magnitude of joystick input
+        AdjustSpeed(input.magnitude);
+        UpdateAnimationParameters(input);
+        MovePlayer(input);
+    }
 
-        // Adjust speed based on input magnitude
-        if (inputMagnitude > 0.5f)
-        {
-            currentSpeed = Mathf.Lerp(currentSpeed, runSpeed, Time.deltaTime * 10); // Smoothly increase speed
-        }
-        else
-        {
-            currentSpeed = Mathf.Lerp(currentSpeed, walkSpeed, Time.deltaTime * 10); // Smoothly decrease speed
-        }
-
+    private void AdjustSpeed(float inputMagnitude)
+    {
+        currentSpeed = Mathf.Lerp(currentSpeed, inputMagnitude > 0.5f ? runSpeed : walkSpeed, Time.deltaTime * 10);
+    }
+    private void UpdateAnimationParameters(Vector2 input)
+    {
         // Update animation parameters
         animator.SetFloat("Horizontal", input.x);
         animator.SetFloat("Vertical", input.y);
+    }
 
-        // Move player
-        Vector3 move = new Vector3(input.x, 0, input.y);
-        move = move.x * cameraTransform.right.normalized + move.z * cameraTransform.forward.normalized;
+    private void MovePlayer(Vector2 input)
+    {
+        Vector3 move = input.x * cameraTransform.right.normalized + input.y * cameraTransform.forward.normalized;
         move.y = 0f;
         controller.Move(move * Time.deltaTime * currentSpeed);
     }
