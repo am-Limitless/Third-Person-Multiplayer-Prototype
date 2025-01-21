@@ -62,13 +62,10 @@ W, A, S, D: Move the character
 
 Spacebar: Jump
 
-Shift (Hold): Run
-
-E: Interact with the sphere
 
 Interact with the Sphere:
 
-Approach the sphere and press E to change its color.
+Approach the sphere and press Ui button to change its colour.
 
 Networking Setup
 
