@@ -1,48 +1,79 @@
 using Mirror;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SphereColorChanger : NetworkBehaviour
 {
-    public Renderer sphereRenderer; // Reference to the sphere's renderer
-    private Material sphereMaterial; // Reference to the material of the sphere
-    private Color currentColor; // Current color of the sphere
+    public Button interactButton; // Reference to the UI button
+    public Renderer sphereRenderer; // Reference to the sphere's Renderer
 
-    void Start()
+    [SyncVar(hook = nameof(OnColorChanged))]
+    private Color currentColor; // Synced variable to track color changes across the network
+
+    private void Start()
     {
-        // Ensure we have the sphere's renderer
         if (sphereRenderer == null)
             sphereRenderer = GetComponent<Renderer>();
 
-        // Get the material of the sphere
-        sphereMaterial = sphereRenderer.material;
+        // Ensure the sphere has a unique material instance
+        sphereRenderer.material = sphereRenderer.material;
 
-        // Initialize the current color to the sphere's initial color
-        currentColor = sphereMaterial.color;
+        // Set the initial color
+        currentColor = sphereRenderer.material.color;
+
+        // Assign the button dynamically if not set in the inspector
+        if (interactButton == null)
+        {
+            GameObject buttonObject = GameObject.FindWithTag("InteractButton");
+            if (buttonObject != null)
+                interactButton = buttonObject.GetComponent<Button>();
+        }
+
+        // Add the button listener
+        if (interactButton != null)
+        {
+            interactButton.onClick.AddListener(Interact);
+        }
+        else
+        {
+            Debug.LogWarning("[SphereColorChanger] Interact button not found!");
+        }
     }
 
-    // This method will be called when a player interacts with the sphere
+    // Method called when the button is clicked
     public void Interact()
     {
-        if (!isLocalPlayer) return; // Only allow the local player to trigger the color change
+        if (!isServer)
+        {
+            Debug.LogError("[Client] Interact() called, but this should only run on the server!");
+            return;
+        }
 
-        // Call the command to change the color on the server
-        CmdChangeColor(Random.ColorHSV());
+        Debug.Log("[Server] Interact() called. Changing color...");
+        ChangeColor(Random.ColorHSV());
     }
 
-    // Command to change the color on the server
-    [Command]
-    void CmdChangeColor(Color newColor)
+    // Change the sphere's color (Server Only)
+    [Server]
+    private void ChangeColor(Color newColor)
     {
-        // Change color on the server
-        currentColor = newColor;
-        RpcChangeColor(newColor); // Synchronize color change with all clients
+        Debug.Log($"[Server] Changing color to {newColor}");
+        currentColor = newColor; // Update the SyncVar, triggering the hook
     }
 
-    // ClientRpc to change the color on all clients
-    [ClientRpc]
-    void RpcChangeColor(Color newColor)
+    // Hook function triggered when `currentColor` is updated
+    private void OnColorChanged(Color oldColor, Color newColor)
     {
-        // Update the material's color on all clients
-        sphereMaterial.color = newColor;
+        Debug.Log($"[Client] OnColorChanged() called. Old: {oldColor}, New: {newColor}");
+        sphereRenderer.material.color = newColor; // Update the material color
+    }
+
+    private void OnDestroy()
+    {
+        // Remove the button listener to avoid memory leaks
+        if (interactButton != null)
+        {
+            interactButton.onClick.RemoveListener(Interact);
+        }
     }
 }
